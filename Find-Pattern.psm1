@@ -16,8 +16,17 @@ Function Find-Pattern{
 
     Example "funny"
 
+    .PARAMETER Filter
+    Optional value used to filter filenames
+
+    Example "*.txt"
+
+    .PARAMETER Recurse
+    Switch for allow the command to perform a recursive search
+
     .EXAMPLE
-    Find files inside the etc directory with the word "tcp" in it
+    Find files inside the etc directory with the word "tcp" in it.
+
     Find-Pattern -Path "c:\windows\system32\drivers\etc\" -Pattern "tcp" -Recurse -Filter "serv*"
 
     LineNumber Path                                     Line
@@ -36,10 +45,14 @@ Function Find-Pattern{
         [Parameter()][switch]$Recurse
     )
 
-    $Command = "get-childitem -Path $Path"
-    if ($Recurse) { $Command += " -Recurse" }
-    if ($Filter.Length -gt 0) { $Command += " -Filter $Filter" }
-    $Command += " | Select-String -pattern $Pattern | Format-Table -Property LineNumber, Path, Line -RepeatHeader -AutoSize"
+    if ($Pattern -contains ";") {
+        Write-Host ('*Searching for Patterns with* ; *is currently broken. Please remove and retry.*' | ConvertFrom-Markdown -AsVT100EncodedString).VT100EncodedString
+    } else {
+        $Command = "get-childitem -Path $Path"
+        if ($Recurse) { $Command += " -Recurse" }
+        if ($Filter.Length -gt 0) { $Command += " -Filter $Filter" }
+        $Command += " | Select-String -Pattern $Pattern | Format-Table -Property LineNumber, Path, Line -RepeatHeader -AutoSize"
 
-    Invoke-Expression $Command
+        Invoke-Expression $Command
+    }
 }
